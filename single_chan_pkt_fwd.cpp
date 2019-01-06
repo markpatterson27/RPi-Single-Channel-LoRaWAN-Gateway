@@ -12,46 +12,6 @@
 // Raspberry PI pin mapping
 // Pin number in this global_conf.json are Wiring Pi number (wPi colunm)
 // issue a `gpio readall` on PI command line to see mapping
-// +-----+-----+---------+--B Plus--+---------+-----+-----+
-// | BCM | wPi |   Name  | Physical | Name    | wPi | BCM |
-// +-----+-----+---------+----++----+---------+-----+-----+
-// |     |     |    3.3v |  1 || 2  | 5v      |     |     |
-// |   2 |   8 |   SDA.1 |  3 || 4  | 5V      |     |     |
-// |   3 |   9 |   SCL.1 |  5 || 6  | 0v      |     |     |
-// |   4 |   7 | GPIO. 7 |  7 || 8  | TxD     | 15  | 14  |
-// |     |     |      0v |  9 || 10 | RxD     | 16  | 15  |
-// |  17 |   0 | GPIO. 0 | 11 || 12 | GPIO. 1 | 1   | 18  |
-// |  27 |   2 | GPIO. 2 | 13 || 14 | 0v      |     |     |
-// |  22 |   3 | GPIO. 3 | 15 || 16 | GPIO. 4 | 4   | 23  |
-// |     |     |    3.3v | 17 || 18 | GPIO. 5 | 5   | 24  |
-// |  10 |  12 |    MOSI | 19 || 20 | 0v      |     |     |
-// |   9 |  13 |    MISO | 21 || 22 | GPIO. 6 | 6   | 25  |
-// |  11 |  14 |    SCLK | 23 || 24 | CE0     | 10  | 8   |
-// |     |     |      0v | 25 || 26 | CE1     | 11  | 7   |
-// |   0 |  30 |   SDA.0 | 27 || 28 | SCL.0   | 31  | 1   |
-// |   5 |  21 | GPIO.21 | 29 || 30 | 0v      |     |     |
-// |   6 |  22 | GPIO.22 | 31 || 32 | GPIO.26 | 26  | 12  |
-// |  13 |  23 | GPIO.23 | 33 || 34 | 0v      |     |     |
-// |  19 |  24 | GPIO.24 | 35 || 36 | GPIO.27 | 27  | 16  |
-// |  26 |  25 | GPIO.25 | 37 || 38 | GPIO.28 | 28  | 20  |
-// |     |     |      0v | 39 || 40 | GPIO.29 | 29  | 21  |
-// +-----+-----+---------+----++----+---------+-----+-----+
-// | BCM | wPi |   Name  | Physical | Name    | wPi | BCM |
-// +-----+-----+---------+--B Plus--+---------+-----+-----+
-
-// global_conf.json For Dragino RPI Lora HAT
-// http://wiki.dragino.com/index.php?title=Lora/GPS_HAT
-//    "pin_nss": 6,
-//    "pin_dio0": 7,
-//    "pin_rst": 0
-//
-// For LoRasPi
-// https://github.com/hallard/LoRasPI
-//    "pin_nss": 8,
-//    "pin_dio0": 6,
-//    "pin_rst": 3,
-//    "pin_led1":4
-
 
 #include "base64.h"
 
@@ -104,11 +64,11 @@ uint32_t cp_up_pkt_fwd;
 typedef enum SpreadingFactors
 {
     SF7 = 7,
-    SF8,
-    SF9,
-    SF10,
-    SF11,
-    SF12
+    SF8 = 8,
+    SF9 = 9,
+    SF10 = 10,
+    SF11 = 11,
+    SF12 = 12
 } SpreadingFactor_t;
 
 typedef struct Server
@@ -126,10 +86,9 @@ typedef struct Server
 
 // SX1272 - Raspberry connections
 // Put them in global_conf.json
-int ssPin = 0xff;
+int nssPin = 0xff;
 int dio0  = 0xff;
-int RST   = 0xff;
-int Led1  = 0xff;
+int rstPin   = 0xff;
 
 // Set location in global_conf.json
 float lat =  0.0;
@@ -237,12 +196,12 @@ void Die(const char *s)
 
 void SelectReceiver()
 {
-  digitalWrite(ssPin, LOW);
+  digitalWrite(nssPin, LOW);
 }
 
 void UnselectReceiver()
 {
-  digitalWrite(ssPin, HIGH);
+  digitalWrite(nssPin, HIGH);
 }
 
 uint8_t ReadRegister(uint8_t addr)
@@ -314,19 +273,18 @@ void SetupLoRa()
   char buff[16];
 
   printf("Trying to detect module with ");
-  printf("NSS=%s "  , PinName(ssPin, buff));
+  printf("NSS=%s "  , PinName(nssPin, buff));
   printf("DIO0=%s " , PinName(dio0 , buff));
-  printf("Reset=%s ", PinName(RST  , buff));
-  printf("Led1=%s\n", PinName(Led1 , buff));
+  printf("Reset=%s ", PinName(rstPin  , buff));
   
   // check basic 
-  if (ssPin == 0xff || dio0 == 0xff) {
-    Die("Bad pin configuration ssPin and dio0 need at least to be defined");
+  if (nssPin == 0xff || dio0 == 0xff) {
+    Die("Bad pin configuration nssPin and dio0 need at least to be defined");
   }
 
-  digitalWrite(RST, HIGH);
+  digitalWrite(rstPin, HIGH);
   delay(100);
-  digitalWrite(RST, LOW);
+  digitalWrite(rstPin, LOW);
   delay(100);
 
   uint8_t version = ReadRegister(REG_VERSION);
@@ -337,9 +295,9 @@ void SetupLoRa()
     sx1272 = true;
   } else {
     // sx1276?
-    digitalWrite(RST, LOW);
+    digitalWrite(rstPin, LOW);
     delay(100);
-    digitalWrite(RST, HIGH);
+    digitalWrite(rstPin, HIGH);
     delay(100);
     version = ReadRegister(REG_VERSION);
     if (version == 0x12) {
@@ -649,29 +607,15 @@ int main()
 {
   struct timeval nowtime;
   uint32_t lasttime;
-  unsigned int led1_timer;
 
   LoadConfiguration("global_conf.json");
   PrintConfiguration();
 
   // Init WiringPI
   wiringPiSetup() ;
-  pinMode(ssPin, OUTPUT);
+  pinMode(nssPin, OUTPUT);
   pinMode(dio0, INPUT);
-  pinMode(RST, OUTPUT);
-
-  // LED ?
-  if (Led1 != 0xff) {
-    pinMode(Led1, OUTPUT);
-
-    // Blink to indicate startup
-    for (uint8_t i=0; i<5 ; i++) {
-      digitalWrite(Led1, 1);
-      delay(200);
-      digitalWrite(Led1, 0);
-      delay(200);
-    }
-  }
+  pinMode(rstPin, OUTPUT);
 
   // Init SPI
   wiringPiSPISetup(SPI_CHANNEL, 500000);
@@ -705,18 +649,9 @@ int main()
   printf("-----------------------------------\n");
 
   while(1) {
-
-    // Packet received ?
-    if (Receivepacket()) {
-      // Led ON
-      if (Led1 != 0xff) {
-        digitalWrite(Led1, 1);
-      }
-
-      // start our Led blink timer, LED as been lit in Receivepacket
-      led1_timer=millis();
-    }
-
+    // rx packet
+    Receivepacket();
+    // timestamp packet
     gettimeofday(&nowtime, NULL);
     uint32_t nowseconds = (uint32_t)(nowtime.tv_sec);
     if (nowseconds - lasttime >= 30) {
@@ -726,25 +661,9 @@ int main()
       cp_nb_rx_ok = 0;
       cp_up_pkt_fwd = 0;
     }
-
-    // Led timer in progress ?
-    if (led1_timer) {
-      // Led timer expiration, Blink duration is 250ms
-      if (millis() - led1_timer >= 250) {
-        // Stop Led timer
-        led1_timer = 0;
-
-        // Led OFF
-        if (Led1 != 0xff) {
-          digitalWrite(Led1, 0);
-        }
-      }
-    }
-
     // Let some time to the OS
     delay(1);
   }
-
   return (0);
 }
 
@@ -769,13 +688,11 @@ void LoadConfiguration(string configurationFile)
           } else if (key.compare("spread_factor") == 0) {
             sf = (SpreadingFactor_t)confIt->value.GetUint();
           } else if (key.compare("pin_nss") == 0) {
-            ssPin = confIt->value.GetUint();
+            nssPin = confIt->value.GetUint();
           } else if (key.compare("pin_dio0") == 0) {
             dio0 = confIt->value.GetUint();
-          } else if (key.compare("pin_rst") == 0) {
-            RST = confIt->value.GetUint();
-          } else if (key.compare("pin_led1") == 0) {
-            Led1 = confIt->value.GetUint();
+          } else if (key.compare("pin_rstPin") == 0) {
+            rstPin = confIt->value.GetUint();
           }
         }
       }

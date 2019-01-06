@@ -59,11 +59,11 @@ uint32_t cp_up_pkt_fwd;
 typedef enum SpreadingFactors
 {
     SF7 = 7,
-    SF8,
-    SF9,
-    SF10,
-    SF11,
-    SF12
+    SF8 = 8,
+    SF9 = 9,
+    SF10 = 10,
+    SF11 = 11,
+    SF12 = 12
 } SpreadingFactor_t;
 
 typedef struct Server
@@ -80,9 +80,9 @@ typedef struct Server
  *******************************************************************************/
 
 // SX1272 - Raspberry connections
-int ssPin = 6;
+int nssPin = 6;
 int dio0  = 7;
-int RST   = 0;
+int rstPin   = 0;
 
 // Set spreading factor (SF7 - SF12)
 SpreadingFactor_t sf = SF7;
@@ -97,9 +97,9 @@ float lon = 0.0;
 int   alt = 0;
 
 /* Informal status fields */
-static char platform[24]    = "Single Channel Gateway";  /* platform definition */
-static char email[40]       = "";                        /* used for contact email */
-static char description[64] = "";                        /* used for free form description */
+static char platform[24]    = "";   /* platform definition */
+static char email[40]       = "";   /* used for contact email */
+static char description[64] = "";   /* used for free form description */
 
 // Servers
 vector<Server_t> servers;
@@ -191,12 +191,12 @@ void Die(const char *s)
 
 void SelectReceiver()
 {
-    digitalWrite(ssPin, LOW);
+    digitalWrite(nssPin, LOW);
 }
 
 void UnselectReceiver()
 {
-    digitalWrite(ssPin, HIGH);
+    digitalWrite(nssPin, HIGH);
 }
 
 uint8_t ReadRegister(uint8_t addr)
@@ -259,9 +259,9 @@ bool ReceivePkt(char* payload, uint8_t* p_length)
 
 void SetupLoRa()
 {
-    digitalWrite(RST, HIGH);
+    digitalWrite(rstPin, HIGH);
     delay(100);
-    digitalWrite(RST, LOW);
+    digitalWrite(rstPin, LOW);
     delay(100);
 
     uint8_t version = ReadRegister(REG_VERSION);
@@ -275,9 +275,9 @@ void SetupLoRa()
     else
     {
         // sx1276?
-        digitalWrite(RST, LOW);
+        digitalWrite(rstPin, LOW);
         delay(100);
-        digitalWrite(RST, HIGH);
+        digitalWrite(rstPin, HIGH);
         delay(100);
         version = ReadRegister(REG_VERSION);
         if (version == 0x12)
@@ -289,7 +289,7 @@ void SetupLoRa()
         else
         {
             printf("Unrecognized transceiver.\n");
-            //printf("Version: 0x%x\n",version);
+            printf("Version: 0x%x\n",version);
             exit(1);
         }
     }
@@ -607,9 +607,9 @@ int main()
     uint32_t lasttime;
 
     wiringPiSetup () ;
-    pinMode(ssPin, OUTPUT);
+    pinMode(nssPin, OUTPUT);
     pinMode(dio0, INPUT);
-    pinMode(RST, OUTPUT);
+    pinMode(rstPin, OUTPUT);
 
     wiringPiSPISetup(CHANNEL, 500000);
 
@@ -626,7 +626,7 @@ int main()
     si_other.sin_family = AF_INET;
 
     ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);  // can we rely on eth0?
+    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
     ioctl(s, SIOCGIFHWADDR, &ifr);
 
     /* display result */
