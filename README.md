@@ -6,63 +6,46 @@ channel LoRaWAN gateway.
 It has been tested on the Raspberry Pi platform, using a Semtech SX1272
 transceiver (HopeRF RFM92W), and SX1276 (HopeRF RFM95W).
 
-The code is for testing and development purposes only, and is not meant 
-for production usage. 
+The code is for testing and development purposes only, and is not meant
+for production usage.
 
-Part of the source has been copied from the Semtech Packet Forwarder 
+Part of the source has been copied from the Semtech Packet Forwarder
 (with permission).
 
-Maintainer: Thomas Telkamp <thomas@telkamp.eu>
+Maintainer: [Thomas Telkamp](thomas@telkamp.eu)
 
-Features
---------
-- listen on configurable frequency and spreading factor
-- SF7 to SF12
-- status updates
-- can forward to two servers
+Was forked by [@jlesech](https://github.com/tftelkamp/single_chan_pkt_fwd) to add json configuration file
+then forked by [@hallard](https://github.com/hallard/single_chan_pkt_fwd)
 
-Not (yet) supported:
-- PACKET_PUSH_ACK processing
-- SF7BW250 modulation
-- FSK modulation
-- downstream messages (tx)
-
-Dependencies
+Installation
 ------------
-- SPI needs to be enabled on the Raspberry Pi (use raspi-config)
-- WiringPi: a GPIO access library written in C for the BCM2835 
-  used in the Raspberry Pi.
-  sudo apt-get install wiringpi
-  see http://wiringpi.com
-- Run packet forwarder as root
 
-Connections
------------
-SX1272 - Raspberry
+Install dependencies 
+- [wiringpi](http://wiringpi.com)
 
-3.3V   - 3.3V (header pin #1) 
-GND	   - GND (pin #6)
-MISO   - MISO (pin #21)
-MOSI   - MOSI (pin #19)
-SCK    - CLK (pin #23)
-NSS    - GPIO6 (pin #22)
-DIO0   - GPIO7 (pin #7)
-RST    - GPIO0 (pin #11)
+```shell
+cd /home/pi
+git clone https://github.com/hallard/single_chan_pkt_fwd
+make
+sudo make install
+````
 
-Configuration
--------------
+To start service (should already be started at boot if you done make install and rebooted of course), stop service or look service status
+```shell
+systemctl start single_chan_pkt_fwd
+systemctl stop single_chan_pkt_fwd
+systemctl status single_chan_pkt_fwd
+````
 
-Defaults:
-
-- LoRa:   SF7 at 868.1 Mhz
-- Server: 54.229.214.112, port 1700  (The Things Network: croft.thethings.girovito.nl)
-
-Edit source node (main.cpp) to change configuration (look for: "Configure these values!").
-
-Please set location, email and description.
+To see gateway log in real time
+```shell
+journalctl -f -u single_chan_pkt_fwd
+````
 
 License
 -------
-The source files in this repository are made available under the Eclipse
-Public License v1.0, except for the base64 implementation, that has been
-copied from the Semtech Packet Forwader.
+The source files in this repository are made available under the Eclipse Public License v1.0, except:
+- base64 implementation, that has been copied from the Semtech Packet Forwarder;
+- RapidJSON, licensed under the MIT License.
+ 
+
