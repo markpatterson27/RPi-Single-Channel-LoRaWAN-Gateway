@@ -99,6 +99,7 @@ int   alt =  0;
 char platform[24] ;    /* platform definition */
 char email[40] ;       /* used for contact email */
 char description[64] ; /* used for free form description */
+bool is_pizero = false;
 
 // Set spreading factor (SF7 - SF12), &nd  center frequency
 // Overwritten by the ones set in global_conf.json
@@ -632,7 +633,12 @@ int main()
   si_other.sin_family = AF_INET;
 
   ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);  // can we rely on eth0?
+  if (is_pizero) { // pi zero
+    strncpy(ifr.ifr_name, "wlan0", IFNAMSIZ - 1);
+  }
+  else {
+    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ - 1);
+  }
   ioctl(s, SIOCGIFHWADDR, &ifr);
 
   // ID based on MAC Adddress of eth0
@@ -718,7 +724,8 @@ void LoadConfiguration(string configurationFile)
           } else if (memberType.compare("desc") == 0 && confIt->value.IsString()) {
             string str = confIt->value.GetString();
             strcpy(description, str.length()<=64 ? str.c_str() : "description is too long");
-
+          } else if (memberType.compare("is_pi_zero") >= 0 && confIt->value.IsBool()) {
+            is_pizero = confIt->value.GetBool();
           } else if (memberType.compare("servers") == 0) {
             const Value& serverConf = confIt->value;
             if (serverConf.IsObject()) {
@@ -768,5 +775,5 @@ void PrintConfiguration()
   printf("Gateway Configuration\n");
   printf("  %s (%s)\n  %s\n", platform, email, description);
   printf("  Latitude=%.8f\n  Longitude=%.8f\n  Altitude=%d\n", lat,lon,alt);
-
+  printf("Pi Zero? %d\n", is_pizero);
 }
