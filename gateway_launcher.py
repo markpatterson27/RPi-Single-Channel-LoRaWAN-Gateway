@@ -123,14 +123,23 @@ def gateway_info():
   # line 2
   display.text(gateway_name, 0, 10, 1)
   # line 3
-  display.text(ttn_server_addr, 0, 20, 1)
+  display.text('TTN: ', 0, 20, 1)
+  display.text(ttn_server_addr[0:9], 25, 20, 1)
   display.show()
   time.sleep(5)
+
+
 
 while True:
     # draw a box to clear the image
     display.fill(0)
+
+    # 
     display.text('LoRaWAN Gateway', 15, 0, 1)
+    # TODO: Get the gateway address, from the MAC address.
+    mac_add = '00:00:00:00:00:00:00:00'
+    display.text(mac_add[0:11], 25, 15, 1)
+    display.text(mac_add[12:23], 25, 25, 1)
 
     # Radio Bonnet Buttons
     if not btnA.value:
