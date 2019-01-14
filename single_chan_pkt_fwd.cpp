@@ -466,10 +466,13 @@ void SendStat()
   string json = sb.GetString();
   //printf("stat update: %s\n", json.c_str());
   printf("stat update: %s", stat_timestamp);
+  fflush(stdout);
   if (cp_nb_rx_ok_tot==0) {
     printf(" no packet received yet\n");
+    fflush(stdout);
   } else {
     printf(" %u packet%sreceived\n", cp_nb_rx_ok_tot, cp_nb_rx_ok_tot>1?"s ":" ");
+    fflush(stdout);
   }
 
   // Build and send message.
@@ -503,12 +506,17 @@ bool Receivepacket()
       rssicorr = sx1272 ? 139 : 157;
 
       printf("Packet RSSI: %d, ", ReadRegister(0x1A) - rssicorr);
+      fflush(stdout);
       printf("RSSI: %d, ", ReadRegister(0x1B) - rssicorr);
+      fflush(stdout);
       printf("SNR: %li, ", SNR);
+      fflush(stdout);
       printf("Length: %hhu Message:'", length);
+      fflush(stdout);
       for (int i=0; i<length; i++) {
         char c = (char) message[i];
         printf("%c",isprint(c)?c:'.');
+        fflush(stdout);
       }
       printf("'\n");
 
@@ -593,6 +601,7 @@ bool Receivepacket()
 
       string json = sb.GetString();
       printf("rxpk update: %s\n", json.c_str());
+      fflush(stdout);
 
       // Build and send message.
       memcpy(buff_up + 12, json.c_str(), json.size());
@@ -657,12 +666,15 @@ int main()
   while(1) {
     // rx packet
     Receivepacket();
+    fflush(stdout);
     // timestamp packet
     gettimeofday(&nowtime, NULL);
+    fflush(stdout);
     uint32_t nowseconds = (uint32_t)(nowtime.tv_sec);
     if (nowseconds - lasttime >= 30) {
       lasttime = nowseconds;
       SendStat();
+      fflush(stdout);
       cp_nb_rx_rcv = 0;
       cp_nb_rx_ok = 0;
       cp_up_pkt_fwd = 0;
