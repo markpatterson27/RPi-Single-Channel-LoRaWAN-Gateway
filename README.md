@@ -30,18 +30,6 @@ make
 sudo make install
 ````
 
-To start service (should already be started at boot if you done make install and rebooted of course), stop service or look service status
-```shell
-systemctl start single_chan_pkt_fwd
-systemctl stop single_chan_pkt_fwd
-systemctl status single_chan_pkt_fwd
-````
-
-To see gateway log in real time
-```shell
-journalctl -f -u single_chan_pkt_fwd
-````
-
 License
 -------
 The source files in this repository are made available under the Eclipse Public License v1.0, except:
