@@ -465,13 +465,15 @@ void SendStat()
 
   string json = sb.GetString();
   //printf("stat update: %s\n", json.c_str());
-  printf("stat update: %s", stat_timestamp);
+  printf("gateway status update\n");
+  printf("%s\n", stat_timestamp);
   fflush(stdout);
-  if (cp_nb_rx_ok_tot==0) {
-    printf(" no packet received yet\n");
+  if (cp_nb_rx_ok_tot == 0) {
+    printf("no packet received yet\n");
     fflush(stdout);
-  } else {
-    printf(" %u packet%sreceived\n", cp_nb_rx_ok_tot, cp_nb_rx_ok_tot>1?"s ":" ");
+  }
+  else {
+    printf(" %u packet%sreceived\n", cp_nb_rx_ok_tot, cp_nb_rx_ok_tot > 1 ? "s " : " ");
     fflush(stdout);
   }
 
