@@ -147,7 +147,7 @@ def gateway_info():
 while True:
     # draw a box to clear the image
     display.fill(0)
-    display.text('LoRaWAN Gateway ID', 15, 0, 1)
+    display.text('LoRaWAN Gateway EUI', 15, 0, 1)
     display.text('{0}:{1}:{2}:ff'.format(mac_addr[0:2], mac_addr[2:4],
                     mac_addr[4:6]), 25, 15, 1)
     display.text('ff:{0}:{1}:{2}'.format(mac_addr[6:8],mac_addr[8:10], 
