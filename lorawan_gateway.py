@@ -1,5 +1,5 @@
 """
-lorawan_gateway.py
+Raspberry Pi Single Channel Gateway
 
 Learn Guide: https://learn.adafruit.com/raspberry-pi-single-channel-lorawan-gateway
 Author: Brent Rubell for Adafruit Industries
@@ -44,6 +44,20 @@ mac_addr = hex(uuid.getnode()).replace('0x', '')
 print('Gateway ID: {0}:{1}:{2}:ff:ff:{3}:{4}:{5}'.format(mac_addr[0:2],mac_addr[2:4],
         mac_addr[4:6],mac_addr[6:8], mac_addr[8:10], mac_addr[10:12]))
 
+# Parse `global_conf.json`
+with open('global_conf.json', 'r') as config:
+    gateway_config = json.load(config)
+# parse `SX127x_conf` 
+SX127x_conf = gateway_config['SX127x_conf']
+gateway_freq = SX127x_conf['freq']/1000000
+gateway_sf = SX127x_conf['spread_factor']
+# parse `gateway_conf`
+gateway_conf = gateway_config['gateway_conf']
+gateway_name = gateway_conf['name']
+# parse 'gateway_conf[servers]'
+server_list = gateway_conf['servers']
+ttn_server = server_list[0]
+ttn_server_addr = ttn_server['address']
 
 def stats():
     """Prints information about the Pi
@@ -81,7 +95,12 @@ def gateway():
     display.text("Starting Gateway...", 15, 0, 1)
     display.show()
     print('starting gateway...')
-    proc = subprocess.Popen("./single_chan_pkt_fwd", bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        proc = subprocess.Popen("./single_chan_pkt_fwd", bufsize=-1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except FileNotFoundError:
+        print("To run the single packet forwarder, you'll need to run `sudo make all` first.")
+        return
+    print('Listening...')
     while True:
       print(proc.stdout.readline())
     proc.kill()
@@ -92,21 +111,6 @@ def gateway_info():
   print('MODE: Gateway Info')
   display.fill(0)
   display.show()
-  # Import `global_conf.json`
-  with open('global_conf.json', 'r') as config:
-    gateway_config = json.load(config)
-  # parse `SX127x_conf` 
-  SX127x_conf = gateway_config['SX127x_conf']
-  gateway_freq = SX127x_conf['freq']/1000000
-  gateway_sf = SX127x_conf['spread_factor']
-  # parse `gateway_conf`
-  gateway_conf = gateway_config['gateway_conf']
-  gateway_name = gateway_conf['name']
-  # parse 'gateway_conf[servers]'
-  server_list = gateway_conf['servers']
-  ttn_server = server_list[0]
-  ttn_server_addr = ttn_server['address']
-
   print('Server: ', ttn_server_addr[0:9])
   print('Freq: ', gateway_freq)
   print('SF: ', gateway_sf)
