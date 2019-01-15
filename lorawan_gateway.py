@@ -101,8 +101,21 @@ def gateway():
         print("To run the single packet forwarder, you'll need to run `sudo make all` first.")
         return
     print('Listening...')
+    display.fill(0)
+    display.text(gateway_name, 15, 0, 1)
+    display.show()
     while True:
-      print(proc.stdout.readline())
+      new_line = proc.stdout.readline().decode('utf-8')
+      print(str(new_line))
+      # grab new data on status update
+      if(new_line == "gateway status update\n"):
+          gtwy_timestamp = proc.stdout.readline().decode('utf-8')
+          print('time: ', gtwy_timestamp)
+          gtwy_status = proc.stdout.readline().decode('utf-8')
+          print('status: ', gtwy_status)
+          display.text(gtwy_status, 15, 15, 1)
+          display.text(gtwy_timestamp, 15, 25, 1)
+          display.show()
     proc.kill()
 
 def gateway_info():
