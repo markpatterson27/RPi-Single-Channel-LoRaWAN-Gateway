@@ -85,9 +85,8 @@ def stats():
     time.sleep(3)
 
 def gateway():
-    """Runs the Semtech Single Channel
-    Packet Forwarder, sends output to
-    a display.
+    """Runs the single channel packet forwarder,
+    sends output to a display.
     """
     print('MODE: Pi Gateway')
     # Clear Display
@@ -110,11 +109,20 @@ def gateway():
       if(new_line == "gateway status update\n"):
           display.fill(0)
           gtwy_timestamp = proc.stdout.readline().decode('utf-8')
-          print('time: ', gtwy_timestamp)
+          print('time:', gtwy_timestamp)
           gtwy_status = proc.stdout.readline().decode('utf-8')
-          print('status: ', gtwy_status)
+          print(gtwy_status)
           display.text(gtwy_status, 0, 15, 1)
           display.text(gtwy_timestamp[11:23], 25, 25, 1)
+      elif new_line == "incoming packet...\n":
+          pkt_rssi = proc.stdout.readline().decode('utf-8')
+          pkt_snr = proc.stdout.readline().decode('utf-8')
+          display.text('RSSI: {0}dBm, SNR{1}dB'.format(pkt_rssi, pkt_snr), 0, 0, 1)
+          pkt_len = proc.stdout.readline().decode('utf-8')
+          pkt_msg = proc.stdout.readline().decode('utf-8')
+          display.text('pkt len: {0}'.format(pkt_len), 0, 15, 1)
+          display.text('pkt msg: {0}'.format(pkt_msg), 0, 25, 1)
+          display.fill(0)
       display.text(gateway_name, 15, 0, 1)
       display.show()
 
