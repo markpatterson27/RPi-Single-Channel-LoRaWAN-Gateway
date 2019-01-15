@@ -76,13 +76,13 @@ def stats():
     MemUsage = subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%d GB  %s\", $3,$2,$5}'"
     Disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    # Write text to display
+    # write text to display
     display.text("IP: "+str(IP), 0, 0, 1)
     display.text(str(CPU), 0, 15, 1)
     display.text(str(MemUsage), 0, 25, 1)
-    # Display text for 5 seconds
+    # display text for 3 seconds
     display.show()
-    time.sleep(5)
+    time.sleep(3)
 
 def gateway():
     """Runs the Semtech Single Channel
@@ -100,23 +100,23 @@ def gateway():
     except FileNotFoundError:
         print("To run the single packet forwarder, you'll need to run `sudo make all` first.")
         return
-    print('Listening...')
     display.fill(0)
     display.text(gateway_name, 15, 0, 1)
     display.show()
     while True:
       new_line = proc.stdout.readline().decode('utf-8')
-      print(str(new_line))
+      print(new_line)
       # grab new data on status update
       if(new_line == "gateway status update\n"):
+          display.fill(0)
           gtwy_timestamp = proc.stdout.readline().decode('utf-8')
           print('time: ', gtwy_timestamp)
           gtwy_status = proc.stdout.readline().decode('utf-8')
           print('status: ', gtwy_status)
-          display.text(gtwy_status, 15, 15, 1)
-          display.text(gtwy_timestamp, 15, 25, 1)
-          display.show()
-    proc.kill()
+          display.text(gtwy_status, 0, 15, 1)
+          display.text(gtwy_timestamp[11:23], 25, 25, 1)
+      display.text(gateway_name, 15, 0, 1)
+      display.show()
 
 def gateway_info():
   """Displays information about the LoRaWAN gateway. 
@@ -133,13 +133,12 @@ def gateway_info():
   display.text('{0} MHz, SF{1}'.format(gateway_freq, gateway_sf), 15, 10, 1)
   display.text('TTN: {0}'.format(ttn_server_addr[0:9]), 15, 20, 1)
   display.show()
-  time.sleep(5)
+  time.sleep(3)
 
 
 while True:
     # draw a box to clear the image
     display.fill(0)
-
     display.text('LoRaWAN Gateway ID', 15, 0, 1)
     display.text('{0}:{1}:{2}:ff'.format(mac_addr[0:2], mac_addr[2:4],
                     mac_addr[4:6]), 25, 15, 1)

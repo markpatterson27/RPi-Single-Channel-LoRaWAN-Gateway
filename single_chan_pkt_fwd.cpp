@@ -469,10 +469,11 @@ void SendStat()
   printf("%s\n", stat_timestamp);
   fflush(stdout);
   if (cp_nb_rx_ok_tot == 0) {
-    printf("no packet received yet\n");
+    printf("status: no packet yet...\n");
     fflush(stdout);
   }
   else {
+    printf("status: new packet!\n");
     printf(" %u packet%sreceived\n", cp_nb_rx_ok_tot, cp_nb_rx_ok_tot > 1 ? "s " : " ");
     fflush(stdout);
   }
