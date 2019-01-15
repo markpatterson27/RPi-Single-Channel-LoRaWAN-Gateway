@@ -5,18 +5,14 @@ Learn Guide: https://learn.adafruit.com/raspberry-pi-single-channel-lorawan-gate
 Author: Brent Rubell for Adafruit Industries
 """
 # Import Python System Libraries
-import sys, json, time, subprocess, re, threading
+import sys, json, time, subprocess, re, threading, uuid
 # Import Adafruit Blinka Libraries
 import busio
 from digitalio import DigitalInOut, Direction, Pull
 import board
 # Import the SSD1306 module.
 import adafruit_ssd1306
-# Import Adafruit TinyLoRa
-from adafruit_tinylora.adafruit_tinylora import TTN, TinyLoRa
 
-# Gateway Command
-mac_add = '00:00:00:00:00:00:00:00'
 
 # Button A
 btnA = DigitalInOut(board.D5)
@@ -43,6 +39,11 @@ display.fill(0)
 display.show()
 width = display.width
 height = display.height
+
+# Gateway id calculation (based off MAC address)
+mac_address = hex(uuid.getnode()).replace('0x', '')
+print('Gateway ID: {0}:{1}:{2}:ff:ff:{3}:{4}:{5}'.format(mac_address[0:2],mac_address[2:4],
+        mac_address[4:6],mac_address[6:8], mac_address[8:10], mac_address[10:12]))
 
 def stats():
     """Prints information about the Pi
@@ -85,9 +86,18 @@ def gateway():
     display.text("Starting Gateway...", 15, 0, 1)
     display.show()
     print('starting gateway...')
-    proc = subprocess.Popen("./single_chan_pkt_fwd", bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen("./single_chan_pkt_fwd", bufsize=-1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # TODO: Print nicely to the display
+    # status updates are in JSON, when they come in, save them to an object
     while True:
-      print(proc.stdout.readline())
+      display.fill(0)
+      display.show()
+      new_line = proc.stdout.readline()
+      display.text(str(new_line), 0, 0, 1)
+      print(new_line)
+      display.show()
+      if(new_line == "no packet received yet"):
+        print('no packet')
     proc.kill()
 
 def gateway_info():
@@ -110,8 +120,8 @@ def gateway_info():
   server_list = gateway_conf['servers']
   ttn_server = server_list[0]
   ttn_server_addr = ttn_server['address']
-
-  print('Server: ', ttn_server)
+  # display the gateway data
+  print('Server: ', ttn_server_addr[0:9])
   print('Freq: ', gateway_freq)
   print('SF: ', gateway_sf)
   print('Gateway Name:', gateway_name)
@@ -129,7 +139,6 @@ def gateway_info():
   time.sleep(5)
 
 
-
 while True:
     # draw a box to clear the image
     display.fill(0)
@@ -137,7 +146,6 @@ while True:
     # 
     display.text('LoRaWAN Gateway', 15, 0, 1)
     # TODO: Get the gateway address, from the MAC address.
-    mac_add = '00:00:00:00:00:00:00:00'
     display.text(mac_add[0:11], 25, 15, 1)
     display.text(mac_add[12:23], 25, 25, 1)
 
@@ -145,10 +153,10 @@ while True:
     if not btnA.value:
         # show pi info
         stats()
-    if not btnB.value:
+    elif not btnB.value:
         # start the gateway
         gateway()
-    if not btnC.value:
+    elif not btnC.value:
         # show gateway configuration
         gateway_info()
 
