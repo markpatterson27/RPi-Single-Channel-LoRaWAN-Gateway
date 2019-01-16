@@ -507,7 +507,7 @@ bool Receivepacket()
       }
 
       rssicorr = sx1272 ? 139 : 157;
-
+      printf("incoming packet...\n");
       printf("Packet RSSI: %d, ", ReadRegister(0x1A) - rssicorr);
       fflush(stdout);
       printf("RSSI: %d, ", ReadRegister(0x1B) - rssicorr);
@@ -674,7 +674,7 @@ int main()
     gettimeofday(&nowtime, NULL);
     fflush(stdout);
     uint32_t nowseconds = (uint32_t)(nowtime.tv_sec);
-    if (nowseconds - lasttime >= 30) {
+    if (nowseconds - lasttime >= 5) {
       lasttime = nowseconds;
       SendStat();
       fflush(stdout);
