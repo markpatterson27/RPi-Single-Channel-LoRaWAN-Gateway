@@ -1,8 +1,8 @@
 {
   "SX127x_conf": {
-    "freq": 904100000,
+    "freq": 905300000,
     "spread_factor": 7,
-    "pin_nss": 1,
+    "pin_nss": 11,
     "pin_dio0": 29,
     "pin_rst": 6
   },
@@ -10,10 +10,10 @@
     "ref_latitude": 0.0,
     "ref_longitude": 0.0,
     "ref_altitude": 10,
-    "name": "Pi Gateway",
-    "email": "contact@email.com",
+    "name": "Pi Radio Bonnet",
+    "email": "your@email.com",
     "desc": "Raspberry Pi 1-Ch Gateway",
-    "is_pi_zero": false,
+    "is_pi_zero": true,
     "servers": [
       {
         "address": "router.us.thethings.network",
