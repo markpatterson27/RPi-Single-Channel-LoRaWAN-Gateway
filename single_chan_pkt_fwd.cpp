@@ -508,20 +508,6 @@ bool Receivepacket()
 
       rssicorr = sx1272 ? 139 : 157;
       printf("incoming packet...\n");
-      printf("Packet RSSI: %d, ", ReadRegister(0x1A) - rssicorr);
-      fflush(stdout);
-      printf("RSSI: %d, ", ReadRegister(0x1B) - rssicorr);
-      fflush(stdout);
-      printf("SNR: %li, ", SNR);
-      fflush(stdout);
-      printf("Length: %hhu Message:'", length);
-      fflush(stdout);
-      for (int i=0; i<length; i++) {
-        char c = (char) message[i];
-        printf("%c",isprint(c)?c:'.');
-        fflush(stdout);
-      }
-      printf("'\n");
 
       char buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
       int buff_index = 0;
@@ -603,7 +589,7 @@ bool Receivepacket()
       writer.EndObject();
 
       string json = sb.GetString();
-      printf("rxpk update: %s\n", json.c_str());
+      printf(json.c_str());
       fflush(stdout);
 
       // Build and send message.
