@@ -112,12 +112,24 @@ def gateway():
           print('time:', gtwy_timestamp)
           gtwy_status = proc.stdout.readline().decode('utf-8')
           print(gtwy_status)
+          display.text(gateway_name, 15, 0, 1)
           display.text(gtwy_status, 0, 15, 1)
           display.text(gtwy_timestamp[11:23], 25, 25, 1)
       elif new_line == "incoming packet...\n":
-          pkt_json = proc.stdout.readline().decode('utf-8')
           display.fill(0)
-      display.text(gateway_name, 15, 0, 1)
+          print('incoming pkt...')
+          # read the incoming packet info
+          pkt_json = proc.stdout.readline().decode('utf-8')
+          print(pkt_json)
+          # parse the packet
+          pkt_data = json.loads(pkt_json)
+          rxpk_data = pkt_data['rxpk'] 
+          pkt_data = rxpk_data.pop(0)
+          pkt_freq = pkt_data['freq']
+          pkt_data = pkt_data['data']
+          display.text('* PKT RX on {0}MHz'.format(pkt_freq), 0, 0, 1)
+          print('Data:', pkt_data)
+          display.text(pkt_data, 0, 15, 1)
       display.show()
 
 def gateway_info():
