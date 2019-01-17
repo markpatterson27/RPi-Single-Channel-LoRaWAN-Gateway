@@ -105,7 +105,7 @@ def gateway():
     while True:
       new_line = proc.stdout.readline().decode('utf-8')
       print(new_line)
-      # grab new data on status update
+      # grab new data on gateway status update
       if(new_line == "gateway status update\n"):
           display.fill(0)
           gtwy_timestamp = proc.stdout.readline().decode('utf-8')
@@ -118,18 +118,23 @@ def gateway():
       elif new_line == "incoming packet...\n":
           display.fill(0)
           print('incoming pkt...')
-          # read the incoming packet info
+          # read incoming packet info
           pkt_json = proc.stdout.readline().decode('utf-8')
           print(pkt_json)
-          # parse the packet
+          # parse packet
           pkt_data = json.loads(pkt_json)
           rxpk_data = pkt_data['rxpk'] 
           pkt_data = rxpk_data.pop(0)
+          # display packet info
           pkt_freq = pkt_data['freq']
-          pkt_data = pkt_data['data']
-          display.text('* PKT RX on {0}MHz'.format(pkt_freq), 0, 0, 1)
-          print('Data:', pkt_data)
-          display.text(pkt_data, 0, 15, 1)
+          pkt_info = pkt_data['data']
+          pkt_size = pkt_data['size']
+          pkt_rssi = pkt_data['rssi']
+          pkt_tmst = pkt_data['tmst']
+          display.text('* PKT RX on {0}MHz'.format(pkt_data['freq']), 0, 0, 1)
+          display.text('RSSI: {0}dBm, Sz: {1}b'.format(pkt_rssi, pkt_size), 0, 10, 1)
+          display.text('timestamp: {0}'.format(pkt_tmst), 0, 20, 1)
+          #display.text(pkt_data, 0, 0, 1)
       display.show()
 
 def gateway_info():
@@ -151,6 +156,7 @@ def gateway_info():
 
 
 while True:
+    gateway()
     # draw a box to clear the image
     display.fill(0)
     display.text('LoRaWAN Gateway EUI', 15, 0, 1)
