@@ -1,19 +1,19 @@
 {
   "SX127x_conf": {
-    "freq": 905300000,
+    "freq": 905100000,
     "spread_factor": 7,
     "pin_nss": 11,
-    "pin_dio0": 29,
-    "pin_rst": 6
+    "pin_dio0": 3,
+    "pin_rst": 25
   },
   "gateway_conf": {
     "ref_latitude": 0.0,
     "ref_longitude": 0.0,
     "ref_altitude": 10,
-    "name": "Pi Radio Bonnet",
-    "email": "your@email.com",
-    "desc": "Raspberry Pi 1-Ch Gateway",
-    "is_pi_zero": true,
+    "name": "Radio Pi Bonnet",
+    "email": "contact@email.com",
+    "desc": "Adafruit Radio Pi LoRa 1-Ch Gateway",
+    "is_pi_zero": false,
     "servers": [
       {
         "address": "router.us.thethings.network",
