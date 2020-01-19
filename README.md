@@ -1,5 +1,5 @@
-Single Channel LoRaWAN Gateway
-==============================
+# Single Channel LoRaWAN Gateway
+
 This repository contains a proof-of-concept implementation of a single
 channel LoRaWAN gateway.
 
@@ -18,35 +18,86 @@ Was forked by [@jlesech](https://github.com/tftelkamp/single_chan_pkt_fwd) to ad
 then forked by [@hallard](https://github.com/hallard/single_chan_pkt_fwd)
 then forked by [@adafruit](https://github.com/adafruit/single_chan_pkt_fwd) to add python scripting
 
-Installation
-------------
+## Added new Features
 
-Install dependencies 
-- [wiringpi](http://wiringpi.com)
+- added back single_chan_pkt_fwd.service for systemd (debian jessie minimal) start
+- added `make install` and `make uninstall` into Makefile to install service
 
-```shell
+## Pin Mapping
+
+Pin mapping used in `global_conf.json` follows WiringPi numbering (wPi colunm).
+
+```bash
+pi@raspberrypi:~ $ gpio readall
+ +-----+-----+---------+------+---+---Pi 3B+-+---+------+---------+-----+-----+
+ | BCM | wPi |   Name  | Mode | V | Physical | V | Mode | Name    | wPi | BCM |
+ +-----+-----+---------+------+---+----++----+---+------+---------+-----+-----+
+ |     |     |    3.3v |      |   |  1 || 2  |   |      | 5v      |     |     |
+ |   2 |   8 |   SDA.1 | ALT0 | 1 |  3 || 4  |   |      | 5v      |     |     |
+ |   3 |   9 |   SCL.1 | ALT0 | 1 |  5 || 6  |   |      | 0v      |     |     |
+ |   4 |   7 | GPIO. 7 |   IN | 0 |  7 || 8  | 1 | ALT0 | TxD     | 15  | 14  |
+ |     |     |      0v |      |   |  9 || 10 | 1 | ALT0 | RxD     | 16  | 15  |
+ |  17 |   0 | GPIO. 0 |   IN | 0 | 11 || 12 | 0 | IN   | GPIO. 1 | 1   | 18  |
+ |  27 |   2 | GPIO. 2 |   IN | 0 | 13 || 14 |   |      | 0v      |     |     |
+ |  22 |   3 | GPIO. 3 |   IN | 0 | 15 || 16 | 0 | IN   | GPIO. 4 | 4   | 23  |
+ |     |     |    3.3v |      |   | 17 || 18 | 0 | IN   | GPIO. 5 | 5   | 24  |
+ |  10 |  12 |    MOSI | ALT0 | 0 | 19 || 20 |   |      | 0v      |     |     |
+ |   9 |  13 |    MISO | ALT0 | 0 | 21 || 22 | 1 | IN   | GPIO. 6 | 6   | 25  |
+ |  11 |  14 |    SCLK | ALT0 | 0 | 23 || 24 | 1 | OUT  | CE0     | 10  | 8   |
+ |     |     |      0v |      |   | 25 || 26 | 1 | OUT  | CE1     | 11  | 7   |
+ |   0 |  30 |   SDA.0 |   IN | 1 | 27 || 28 | 1 | IN   | SCL.0   | 31  | 1   |
+ |   5 |  21 | GPIO.21 |   IN | 1 | 29 || 30 |   |      | 0v      |     |     |
+ |   6 |  22 | GPIO.22 |   IN | 1 | 31 || 32 | 1 | IN   | GPIO.26 | 26  | 12  |
+ |  13 |  23 | GPIO.23 |   IN | 0 | 33 || 34 |   |      | 0v      |     |     |
+ |  19 |  24 | GPIO.24 |   IN | 0 | 35 || 36 | 0 | IN   | GPIO.27 | 27  | 16  |
+ |  26 |  25 | GPIO.25 |   IN | 0 | 37 || 38 | 0 | IN   | GPIO.28 | 28  | 20  |
+ |     |     |      0v |      |   | 39 || 40 | 0 | IN   | GPIO.29 | 29  | 21  |
+ +-----+-----+---------+------+---+----++----+---+------+---------+-----+-----+
+ | BCM | wPi |   Name  | Mode | V | Physical | V | Mode | Name    | wPi | BCM |
+ +-----+-----+---------+------+---+---Pi 3B+-+---+------+---------+-----+-----+
+```
+
+Pin configuration for using the Adafruit module:
+
+```json
+    "pin_nss": 11,
+    "pin_dio0": 3,
+    "pin_rst": 25
+```
+
+## Installation
+
+Install dependencies:
+
+- [wiringpi](http://wiringpi.com) (Now comes pre-installed in Raspbian)
+
+Build project:
+
+```bash
 cd /home/pi
-git clone https://github.com/hallard/single_chan_pkt_fwd
+git clone https://github.com/markpatterson27/single_chan_pkt_fwd
 make
 sudo make install
-````
+```
 
 To start service (should already be started at boot if you done make install and rebooted of course), stop service or look service status
-```shell
+
+```bash
 systemctl start single_chan_pkt_fwd
 systemctl stop single_chan_pkt_fwd
 systemctl status single_chan_pkt_fwd
-````
+```
 
 To see gateway log in real time
-```shell
-journalctl -f -u single_chan_pkt_fwd
-````
 
-License
--------
+```bash
+journalctl -f -u single_chan_pkt_fwd
+```
+
+## License
+
 The source files in this repository are made available under the Eclipse Public License v1.0, except:
+
 - base64 implementation, that has been copied from the Semtech Packet Forwarder;
 - RapidJSON, licensed under the MIT License.
  
-
