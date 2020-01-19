@@ -20,6 +20,8 @@ clean:
 	rm *.o single_chan_pkt_fwd
 
 install:
+	sudo mkdir /opt/single_chan_pkt_fwd/
+	sudo cp -f ./single_chan_pkt_fwd /opt/single_chan_pkt_fwd/
 	sudo cp -f ./single_chan_pkt_fwd.service /lib/systemd/system/
 	sudo systemctl enable single_chan_pkt_fwd.service
 	sudo systemctl daemon-reload
@@ -29,4 +31,5 @@ install:
 uninstall:
 	sudo systemctl stop single_chan_pkt_fwd
 	sudo systemctl disable single_chan_pkt_fwd.service
-	sudo rm -f /lib/systemd/system/single_chan_pkt_fwd.service 
+	sudo rm -f /lib/systemd/system/single_chan_pkt_fwd.service
+	sudo rm -rf /opt/single_chan_pkt_fwd
