@@ -16,6 +16,7 @@ Maintainer: [Thomas Telkamp](thomas@telkamp.eu)
 
 Was forked by [@jlesech](https://github.com/tftelkamp/single_chan_pkt_fwd) to add json configuration file
 then forked by [@hallard](https://github.com/hallard/single_chan_pkt_fwd)
+then forked by [@adafruit](https://github.com/adafruit/single_chan_pkt_fwd) to add python scripting
 
 Installation
 ------------
