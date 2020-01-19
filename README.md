@@ -70,6 +70,8 @@ Pin configuration for using the Adafruit module:
 Install dependencies:
 
 - [wiringpi](http://wiringpi.com) (Now comes pre-installed in Raspbian)
+- [circuitpython](https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi)
+- [Adafruit SSD1306 python module](https://github.com/adafruit/Adafruit_SSD1306)
 
 Build project:
 
