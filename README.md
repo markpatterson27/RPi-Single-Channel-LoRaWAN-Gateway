@@ -61,8 +61,8 @@ Pin configuration for using the Adafruit module:
 
 ```json
     "pin_nss": 11,
-    "pin_dio0": 3,
-    "pin_rst": 25
+    "pin_dio0": 5,
+    "pin_rst": 6
 ```
 
 ## Installation
