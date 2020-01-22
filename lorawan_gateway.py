@@ -122,7 +122,7 @@ def gateway():
             display.fill(0)
             print('incoming pkt...')
             # read incoming packet info
-            pkt_json = proc.stdout.readline().decode('utf-8')
+            pkt_json = proc.stdout.readline().decode('utf-8').replace('gateway status update\n', '')
             print(pkt_json)
             # parse packet
             pkt_data = json.loads(pkt_json)
