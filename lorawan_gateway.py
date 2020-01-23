@@ -1,14 +1,17 @@
 """
-Raspberry Pi Single Channel Gateway
-
+Based on Raspberry Pi Single Channel Gateway by Adafruit
 Learn Guide: https://learn.adafruit.com/raspberry-pi-single-channel-lorawan-gateway
 Author: Brent Rubell for Adafruit Industries
+
+Modified by Mark Patterson
 """
 # Import Python System Libraries
 import json
 import time
 import subprocess
 import uuid
+# Import GPIO library
+import RPi.GPIO as GPIO
 # Import Adafruit Blinka Libraries
 import busio
 from digitalio import DigitalInOut, Direction, Pull
@@ -16,20 +19,21 @@ import board
 # Import the SSD1306 module.
 import adafruit_ssd1306
 
-# Button A
-btnA = DigitalInOut(board.D5)
-btnA.direction = Direction.INPUT
-btnA.pull = Pull.UP
+# define button pin
+BUTTON_PIN = 21
 
-# Button B
-btnB = DigitalInOut(board.D6)
-btnB.direction = Direction.INPUT
-btnB.pull = Pull.UP
+# setup GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-# Button C
-btnC = DigitalInOut(board.D12)
-btnC.direction = Direction.INPUT
-btnC.pull = Pull.UP
+button_pressed = False
+
+# button callback
+def button_callback(channel):
+    global button_pressed
+    button_pressed = True
+
+GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=button_callback, bouncetime=300)  
 
 # Create the I2C interface.
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -155,26 +159,44 @@ def gateway_info():
     display.show()
     time.sleep(3)
 
+# main loop
+try:
+    button_press_count = 0
+    button_pressed = True   # force first button press
+    while True:
+        if button_pressed:
+            button_press_count += 1
+            if button_press_count > 4:
+                button_press_count = 0
+            
+            # cycle display screen
+            if button_press_count == 0:
+                # draw a box to clear the image
+                display.fill(0)
+            elif button_press_count == 1:
+                # draw a box to clear the image
+                display.fill(0)
+                display.text('LoRaWAN Gateway EUI', 15, 0, 1)
+                display.text('{0}:{1}:{2}:ff'.format(mac_addr[0:2], mac_addr[2:4],
+                                                    mac_addr[4:6]), 25, 15, 1)
+                display.text('ff:{0}:{1}:{2}'.format(mac_addr[6:8],mac_addr[8:10],
+                                                    mac_addr[10:12]), 25, 25, 1)
+            elif button_press_count == 2:
+                # show pi info
+                stats()
+            elif button_press_count == 3:
+                # start the gateway
+                gateway()
+            elif button_press_count == 4:
+                # show gateway configuration
+                gateway_info()
 
-while True:
-    # draw a box to clear the image
-    display.fill(0)
-    display.text('LoRaWAN Gateway EUI', 15, 0, 1)
-    display.text('{0}:{1}:{2}:ff'.format(mac_addr[0:2], mac_addr[2:4],
-                                         mac_addr[4:6]), 25, 15, 1)
-    display.text('ff:{0}:{1}:{2}'.format(mac_addr[6:8],mac_addr[8:10],
-                                         mac_addr[10:12]), 25, 25, 1)
+            display.show()
+            button_pressed = False
 
-    # Radio Bonnet Buttons
-    if not btnA.value:
-        # show pi info
-        stats()
-    if not btnB.value:
-        # start the gateway
-        gateway()
-    if not btnC.value:
-        # show gateway configuration
-        gateway_info()
+        time.sleep(.1)
 
-    display.show()
-    time.sleep(.1)
+except KeyboardInterrupt:
+    print('Program exited by user')
+finally:
+    GPIO.cleanup()  # clean up GPIO on exit
