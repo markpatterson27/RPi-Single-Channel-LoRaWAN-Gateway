@@ -89,62 +89,6 @@ def display_pi_stats():
     display.text(str(CPU), 0, 15, 1)
     display.text(str(MemUsage), 0, 25, 1)
 
-def gateway():
-    """Runs the single channel packet forwarder,
-    sends output to a display.
-    """
-    print('MODE: Pi Gateway')
-    # Clear Display
-    display.fill(0)
-    display.text("Starting Gateway...", 15, 0, 1)
-    display.show()
-    print('starting gateway...')
-    try:
-        proc = subprocess.Popen("./single_chan_pkt_fwd",
-                                bufsize=-1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except FileNotFoundError:
-        print("To run the single packet forwarder, you'll need to run `sudo make all` first.")
-        return
-    display.fill(0)
-    display.text(gateway_name, 15, 0, 1)
-    display.show()
-    while True:
-        new_line = proc.stdout.readline().decode('utf-8')
-        print(new_line)
-        # grab new data on gateway status update
-        if new_line == "gateway status update\n":
-            display.fill(0)
-            gtwy_timestamp = proc.stdout.readline().decode('utf-8')
-            print('time:', gtwy_timestamp)
-            gtwy_status = proc.stdout.readline().decode('utf-8')
-            print(gtwy_status)
-            display.text(gateway_name, 15, 0, 1)
-            display.text(gtwy_status, 0, 15, 1)
-            display.text(gtwy_timestamp[11:23], 25, 25, 1)
-        elif new_line == "incoming packet...\n":
-            display.fill(0)
-            print('incoming pkt...')
-            # read incoming packet info
-            pkt_json = proc.stdout.readline().decode('utf-8').replace('gateway status update\n', '')
-            print(pkt_json)
-            # parse packet
-            pkt_data = json.loads(pkt_json)
-            rxpk_data = pkt_data['rxpk']
-            pkt_data = rxpk_data.pop(0)
-            # display packet info
-            pkt_freq = pkt_data['freq']
-            pkt_size = pkt_data['size']
-            pkt_rssi = pkt_data['rssi']
-            pkt_tmst = pkt_data['tmst']
-            display.text('* PKT RX on {0}MHz'.format(pkt_freq), 0, 0, 1)
-            display.text('RSSI: {0}dBm, Sz: {1}b'.format(pkt_rssi, pkt_size), 0, 10, 1)
-            display.text('timestamp: {0}'.format(pkt_tmst), 0, 20, 1)
-        display.show()
-
-def display_gateway_status():
-    #TODO
-    return
-
 def display_gateway_info():
     """Displays information about the LoRaWAN gateway.
     """
@@ -196,8 +140,6 @@ try:
         elif button_press_count == 3:
             # start the gateway
             start_gateway = True
-            if gateway_running:
-                display_gateway_status()
         elif button_press_count == 4:
             # show gateway configuration
             if display_refresh:
@@ -206,8 +148,60 @@ try:
 
         display.show()
 
+        if start_gateway and not gateway_running:
+            # start gateway
+            print('MODE: Pi Gateway')
+            # Clear display then draw new content
+            display.fill(0)
+            display.text("Starting Gateway...", 15, 0, 1)
+            display.show()
+            print('starting gateway...')
+            try:
+                proc = subprocess.Popen("./single_chan_pkt_fwd",
+                                        bufsize=-1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                gateway_running = True
+            except FileNotFoundError:
+                print("To run the single packet forwarder, you'll need to run `sudo make all` first.")
+            display.fill(0)
+            display.text(gateway_name, 15, 0, 1)
+            display.show()
+
         if gateway_running:
-            pass
+            # grab new data on gateway status update
+            new_line = proc.stdout.readline().decode('utf-8').rstrip('\n')
+            print('\n', new_line)
+            if new_line == "gateway status update":
+                gtwy_timestamp = proc.stdout.readline().decode('utf-8').rstrip('\n')
+                print('time:', gtwy_timestamp)
+                gtwy_status = proc.stdout.readline().decode('utf-8').rstrip('\n')
+                print(gtwy_status)
+                if button_press_count == 3: # if display gateway status
+                    display.fill(0)
+                    display.text(gateway_name, 15, 0, 1)
+                    display.text(gtwy_status, 0, 15, 1)
+                    display.text(gtwy_timestamp[11:23], 25, 25, 1)
+                    display.show()
+            elif new_line == "incoming packet...":
+                # read incoming packet info
+                print('incoming pkt...')
+                pkt_json = proc.stdout.readline().decode('utf-8').replace('gateway status update\n', '')
+                print(pkt_json)
+                if button_press_count == 3: # if display gateway status
+                    display.fill(0)
+                    # parse packet
+                    pkt_data = json.loads(pkt_json)
+                    rxpk_data = pkt_data['rxpk']
+                    pkt_data = rxpk_data.pop(0)
+                    # display packet info
+                    pkt_freq = pkt_data['freq']
+                    pkt_size = pkt_data['size']
+                    pkt_rssi = pkt_data['rssi']
+                    pkt_tmst = pkt_data['tmst']
+                    display.text('* PKT RX on {0}MHz'.format(pkt_freq), 0, 0, 1)
+                    display.text('RSSI: {0}dBm, Sz: {1}b'.format(pkt_rssi, pkt_size), 0, 10, 1)
+                    display.text('timestamp: {0}'.format(pkt_tmst), 0, 20, 1)
+                    display.show()
+
         else:
             time.sleep(.5)
 
