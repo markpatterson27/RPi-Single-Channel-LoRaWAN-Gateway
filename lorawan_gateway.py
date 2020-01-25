@@ -86,9 +86,6 @@ def stats():
     display.text("IP: "+str(IP), 0, 0, 1)
     display.text(str(CPU), 0, 15, 1)
     display.text(str(MemUsage), 0, 25, 1)
-    # display text for 3 seconds
-    display.show()
-    time.sleep(3)
 
 def gateway():
     """Runs the single channel packet forwarder,
@@ -156,45 +153,56 @@ def gateway_info():
     display.text(gateway_name, 15, 0, 1)
     display.text('{0} MHz, SF{1}'.format(gateway_freq, gateway_sf), 15, 10, 1)
     display.text('TTN: {0}'.format(ttn_server_addr[0:9]), 15, 20, 1)
-    display.show()
-    time.sleep(3)
 
 # main loop
 try:
     button_press_count = 0
     button_pressed = True   # force first button press
+    display_refresh = True
+    gateway_run = False
     while True:
         if button_pressed:
             button_press_count += 1
             if button_press_count > 4:
                 button_press_count = 0
+            display_refresh = True
+            button_pressed = False
             
-            # cycle display screen
-            if button_press_count == 0:
-                # draw a box to clear the image
+        # cycle display screen
+        if button_press_count == 0:
+            # draw a box to clear the image
+            if display_refresh:
                 display.fill(0)
-            elif button_press_count == 1:
-                # draw a box to clear the image
+                display_refresh = False
+        elif button_press_count == 1:
+            # draw a box to clear the image
+            if display_refresh:
                 display.fill(0)
                 display.text('LoRaWAN Gateway EUI', 15, 0, 1)
                 display.text('{0}:{1}:{2}:ff'.format(mac_addr[0:2], mac_addr[2:4],
                                                     mac_addr[4:6]), 25, 15, 1)
                 display.text('ff:{0}:{1}:{2}'.format(mac_addr[6:8],mac_addr[8:10],
                                                     mac_addr[10:12]), 25, 25, 1)
-            elif button_press_count == 2:
-                # show pi info
-                stats()
-            elif button_press_count == 3:
-                # start the gateway
-                gateway()
-            elif button_press_count == 4:
-                # show gateway configuration
+                display_refresh = False
+        elif button_press_count == 2:
+            # show pi info
+            stats()
+        elif button_press_count == 3:
+            # start the gateway
+            gateway_run = True
+            gateway()
+        elif button_press_count == 4:
+            # show gateway configuration
+            if display_refresh:
                 gateway_info()
+                display_refresh = False
 
-            display.show()
-            button_pressed = False
+        display.show()
 
-        time.sleep(.1)
+        if gateway_run:
+            pass
+        else:
+            time.sleep(.5)
 
 except KeyboardInterrupt:
     print('Program exited by user')
