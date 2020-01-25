@@ -67,7 +67,9 @@ server_list = gateway_conf['servers']
 ttn_server = server_list[0]
 ttn_server_addr = ttn_server['address']
 
-def stats():
+gateway_running = False
+
+def display_pi_stats():
     """Prints information about the Pi
     to a display
     """
@@ -139,7 +141,11 @@ def gateway():
             display.text('timestamp: {0}'.format(pkt_tmst), 0, 20, 1)
         display.show()
 
-def gateway_info():
+def display_gateway_status():
+    #TODO
+    return
+
+def display_gateway_info():
     """Displays information about the LoRaWAN gateway.
     """
     print('MODE: Gateway Info')
@@ -159,7 +165,7 @@ try:
     button_press_count = 0
     button_pressed = True   # force first button press
     display_refresh = True
-    gateway_run = False
+    start_gateway = False
     while True:
         if button_pressed:
             button_press_count += 1
@@ -186,20 +192,21 @@ try:
                 display_refresh = False
         elif button_press_count == 2:
             # show pi info
-            stats()
+            display_pi_stats()
         elif button_press_count == 3:
             # start the gateway
-            gateway_run = True
-            gateway()
+            start_gateway = True
+            if gateway_running:
+                display_gateway_status()
         elif button_press_count == 4:
             # show gateway configuration
             if display_refresh:
-                gateway_info()
+                display_gateway_info()
                 display_refresh = False
 
         display.show()
 
-        if gateway_run:
+        if gateway_running:
             pass
         else:
             time.sleep(.5)
