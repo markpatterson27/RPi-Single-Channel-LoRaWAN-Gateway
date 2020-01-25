@@ -18,6 +18,8 @@ Was forked by [@jlesech](https://github.com/tftelkamp/single_chan_pkt_fwd) to ad
 then forked by [@hallard](https://github.com/hallard/single_chan_pkt_fwd)
 then forked by [@adafruit](https://github.com/adafruit/single_chan_pkt_fwd) to add python scripting
 
+The gateway can either be run as a service (using `sudo make install`), or run with a python frontend that also updates status messages to an attached OLED display.
+
 ## Added new Features
 
 - added back single_chan_pkt_fwd.service for systemd (debian jessie minimal) start
@@ -79,6 +81,13 @@ Build project:
 cd /home/pi
 git clone https://github.com/markpatterson27/single_chan_pkt_fwd
 make
+```
+
+### Run as service
+
+To run the gateway as a service, use `sudo make install`.
+
+```bash
 sudo make install
 ```
 
@@ -96,10 +105,17 @@ To see gateway log in real time
 journalctl -f -u single_chan_pkt_fwd
 ```
 
+### Run as python script
+
+To run the gateway from the python script, just run the python script.
+
+```bash
+python3 lorawan_gateway.py
+```
+
 ## License
 
 The source files in this repository are made available under the Eclipse Public License v1.0, except:
 
 - base64 implementation, that has been copied from the Semtech Packet Forwarder;
 - RapidJSON, licensed under the MIT License.
- 
