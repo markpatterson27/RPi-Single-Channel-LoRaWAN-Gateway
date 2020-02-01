@@ -63,7 +63,10 @@ gateway_sf = SX127x_conf['spread_factor']
 gateway_conf = gateway_config['gateway_conf']
 gateway_name = gateway_conf['name']
 # parse 'gateway_conf[servers]'
-server_list = gateway_conf['servers']
+server_list = []
+for server in gateway_conf['servers']:
+    if server['enabled'] == True:
+        server_list.append(server)
 ttn_server = server_list[0]
 ttn_server_addr = ttn_server['address']
 
