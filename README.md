@@ -75,6 +75,12 @@ Install dependencies:
 - [circuitpython](https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi)
 - [Adafruit SSD1306 python module](https://github.com/adafruit/Adafruit_CircuitPython_SSD1306)
 
+CircuitPython requirements can be installed using pip.
+
+```bash
+pip3 install -r requirements.txt
+```
+
 Build project:
 
 ```bash
